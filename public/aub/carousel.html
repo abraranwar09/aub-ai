@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Image Carousel</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f5f5f5;
+        }
+        .carousel-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .carousel {
+            position: relative;
+            height: 400px;
+            margin: 0 auto;
+        }
+        .carousel-track {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: -10%;
+        }
+        .carousel-slide {
+            position: absolute;
+            width: 300px;
+            transition: all 0.5s ease;
+            opacity: 0.6;
+            transform: scale(0.8);
+            text-align: center;
+        }
+        .carousel-slide.active {
+            opacity: 1;
+            transform: scale(1.2);
+            z-index: 5;
+        }
+        .carousel-slide img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .slide-title {
+            margin-top: 12px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            color: #333;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.5s ease;
+        }
+        .carousel-slide.active .slide-title {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .carousel-nav {
+            position: absolute;
+            bottom: -60px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        .carousel-dots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            padding: 0;
+        }
+        .dot.active {
+            background-color: hsl(0, 100%, 50%);
+        }
+        .nav-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="carousel-container">
+        <div class="carousel">
+            <div class="carousel-track">
+                <div class="carousel-slide" onclick="handleSendMessage('Features')">
+                    <img src="./assets/feat.jpg?height=400&width=600" alt="Features">
+                    <div class="slide-title">Features</div>
+                </div>
+                <div class="carousel-slide" onclick="handleSendMessage('Exterior')">
+                    <img src="./assets/ext.jpg?height=400&width=600" alt="Exterior">
+                    <div class="slide-title">Exterior</div>
+                </div>
+                <div class="carousel-slide" onclick="handleSendMessage('Interior')">
+                    <img src="./assets/int.avif?height=400&width=600" alt="Interior">
+                    <div class="slide-title">Interior</div>
+                </div>
+                <!-- <div class="carousel-slide">
+                    <img src="/placeholder.svg?height=400&width=600" alt="Mountain Vista">
+                    <div class="slide-title">Misty Mountain Morning</div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="/placeholder.svg?height=400&width=600" alt="Mountain Peak">
+                    <div class="slide-title">Rocky Mountain Peak</div>
+                </div> -->
+            </div>
+            <div class="carousel-nav">
+                <button class="nav-button prev" onclick="moveSlide(-1)">←</button>
+                <div class="carousel-dots">
+                    <button class="dot" onclick="setSlide(0)"></button>
+                    <button class="dot active" onclick="setSlide(1)"></button>
+                    <button class="dot" onclick="setSlide(2)"></button>
+                </div>
+                <button class="nav-button next" onclick="moveSlide(1)">→</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = document.querySelectorAll('.carousel-slide').length;
+
+        function updateSlidePositions() {
+            const slides = document.querySelectorAll('.carousel-slide');
+            slides.forEach((slide, index) => {
+                const offset = (index - currentSlide) * 150;
+                slide.style.transform = `translateX(${offset}px) scale(${index === currentSlide ? 1.2 : 0.8})`;
+                slide.style.zIndex = index === currentSlide ? 5 : 0;
+                slide.style.opacity = Math.abs(index - currentSlide) > 2 ? 0 : 0.6;
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                    slide.style.opacity = 1;
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+        }
+
+        function moveSlide(n) {
+            currentSlide = (currentSlide + n + totalSlides) % totalSlides;
+            updateSlides();
+        }
+
+        function setSlide(n) {
+            currentSlide = n;
+            updateSlides();
+        }
+
+        function updateSlides() {
+            updateSlidePositions();
+            updateDots();
+        }
+
+        function updateDots() {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        // Initialize
+        updateSlidePositions();
+    </script>
+</body>
+</html>
