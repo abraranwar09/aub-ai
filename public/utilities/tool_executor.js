@@ -21,6 +21,7 @@ async function displayComponent(component_id, message, data) {
     console.log(componentData);
 
     displayMessage(message, 'ai');
+    const chatMessages = document.getElementById('chatMessages') || document.querySelector('.chat-messages');
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
 
@@ -28,7 +29,7 @@ async function displayComponent(component_id, message, data) {
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'button-container';
         buttonContainer.id = 'buttonContainer'
-        document.querySelector('.chat-messages').appendChild(buttonContainer);
+        chatMessages.appendChild(buttonContainer);
         
         for (const item of data) {
             console.log(item.button_text);
@@ -51,7 +52,7 @@ async function displayComponent(component_id, message, data) {
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'button-container';
         buttonContainer.id = 'buttonContainer'
-        document.querySelector('.chat-messages').appendChild(buttonContainer);
+        chatMessages.appendChild(buttonContainer);
         
         for (const item of data) {
             console.log(item.button_text);
@@ -77,7 +78,7 @@ async function displayComponent(component_id, message, data) {
         productContainer.style.display = 'flex';
         productContainer.style.flexWrap = 'wrap';
         productContainer.style.justifyContent = 'space-between';
-        document.querySelector('.chat-messages').appendChild(productContainer);
+        chatMessages.appendChild(productContainer);
 
         for (const item of data) {
             console.log(item.main_text);
@@ -114,7 +115,7 @@ async function displayComponent(component_id, message, data) {
         const sliderWrapper = document.createElement('div');
         sliderWrapper.className = 'slider-wrapper';
         sliderWrapper.id = 'sliderWrapper';
-        document.querySelector('.chat-messages').appendChild(sliderWrapper);
+        chatMessages.appendChild(sliderWrapper);
 
         const slideContainer = document.createElement('div');
         slideContainer.className = 'slider-container';
@@ -282,7 +283,7 @@ async function displayComponent(component_id, message, data) {
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'button-container';
         buttonContainer.id = 'buttonContainer'
-        document.querySelector('.chat-messages').appendChild(buttonContainer);
+        chatMessages.appendChild(buttonContainer);
 
         for (const item of data) {
             console.log(item.button_text);
@@ -328,7 +329,7 @@ async function displayComponent(component_id, message, data) {
         const sliderWrapper = document.createElement('div');
         sliderWrapper.className = 'slider-wrapper';
         sliderWrapper.id = 'sliderWrapper'
-        document.querySelector('.chat-messages').appendChild(sliderWrapper);
+        chatMessages.appendChild(sliderWrapper);
 
         const sliderContainer = document.createElement('div');
         sliderContainer.className = 'slider-container';
@@ -489,7 +490,7 @@ async function displayComponent(component_id, message, data) {
         const sliderWrapper = document.createElement('div');
         sliderWrapper.className = 'details-slider-wrapper';
         sliderWrapper.id = 'sliderWrapper'
-        document.querySelector('.chat-messages').appendChild(sliderWrapper);
+        chatMessages.appendChild(sliderWrapper);
 
         const sliderContainer = document.createElement('div');
         sliderContainer.className = 'details-slider-container';
@@ -586,7 +587,7 @@ async function displayComponent(component_id, message, data) {
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'button-container';
         buttonContainer.id = 'buttonContainer'
-        document.querySelector('.chat-messages').appendChild(buttonContainer);
+        chatMessages.appendChild(buttonContainer);
 
         for (const item of data) {
             console.log(item.button_text);
@@ -954,7 +955,8 @@ async function showCarousel(message) {
   const carouselContainer = document.createElement('div');
   carouselContainer.className = 'carousel-container';
   carouselContainer.id = 'carouselContainer'
-  document.querySelector('.chat-messages').appendChild(carouselContainer);
+  const chatMessages = document.getElementById('chatMessages') || document.querySelector('.chat-messages');
+  chatMessages.appendChild(carouselContainer);
   
 
   carouselContainer.innerHTML += `

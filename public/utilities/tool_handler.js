@@ -1,4 +1,4 @@
-async function handleToolCalls(data, skeletonLoader) {
+async function handleToolCalls(data) {
     if (data.finish_reason === 'tool_calls') {
         const toolCallPromises = data.tool_calls.map(async (toolCall) => {
             const functionName = toolCall.function.name;
@@ -54,8 +54,8 @@ async function handleToolCalls(data, skeletonLoader) {
         if (responseData.response) {
             console.log('tool call submitted');
             
-            // console.log(skeletonLoader);
-            document.querySelector('.skeleton-loader').remove();
+            // Hide typing indicator and display response
+            hideTypingIndicator();
             displayMessage(responseData.response, 'ai');
         }
     }

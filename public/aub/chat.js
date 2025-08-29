@@ -1,115 +1,157 @@
- // Auto-resize textarea
- const messageInput = document.getElementById('messageInput');
- messageInput.addEventListener('input', function() {
-     this.style.height = 'auto';
-     this.style.height = Math.min(this.scrollHeight, 120) + 'px';
- });
+ // Configuration from chat-backup.js
+const temperature = 0.5;
 
- // Handle form submission
- document.getElementById('chatForm').addEventListener('submit', function(e) {
-     e.preventDefault();
-     const message = messageInput.value.trim();
-     if (message) {
-         addMessage(message, 'user');
-         messageInput.value = '';
-         messageInput.style.height = 'auto';
-         
-         // Show typing indicator
-         showTypingIndicator();
-         
-         // Simulate AI response after delay
-         setTimeout(() => {
-             hideTypingIndicator();
-             addMessage(getAIResponse(message), 'ai');
-         }, 1500 + Math.random() * 1000);
-     }
- });
+const today = new Date();
+const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+console.log('User Timezone:', userTimeZone);
 
- // Handle quick question buttons
- document.querySelectorAll('.quick-question').forEach(button => {
-     button.addEventListener('click', function() {
-         const question = this.textContent;
-         addMessage(question, 'user');
-         
-         showTypingIndicator();
-         setTimeout(() => {
-             hideTypingIndicator();
-             addMessage(getAIResponse(question), 'ai');
-         }, 1500);
-     });
- });
+const formattedToday = today.toLocaleString('en-US', { timeZone: userTimeZone }).replace(',', '');  
 
- function addMessage(text, sender) {
-     const chatMessages = document.getElementById('chatMessages');
-     const messageDiv = document.createElement('div');
-     messageDiv.className = 'message-bubble';
-     
-     if (sender === 'user') {
-         messageDiv.innerHTML = `
-             <div class="flex items-start space-x-3 justify-end">
-                 <div class="bg-white rounded-lg px-4 py-3 shadow-sm border border-gray-100 max-w-md">
-                     <p class="font-source text-sm leading-relaxed" style="color: var(--aub-dark);">${text}</p>
-                 </div>
-                 <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: var(--aub-gold);">
-                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                     </svg>
-                 </div>
-             </div>
-         `;
-     } else {
-         messageDiv.innerHTML = `
-             <div class="flex items-start space-x-3">
-                 <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: var(--aub-maroon);">
-                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                     </svg>
-                 </div>
-                 <div class="bg-white rounded-lg px-4 py-3 shadow-sm border border-gray-100 max-w-md">
-                     <p class="font-source text-sm leading-relaxed" style="color: var(--aub-dark);">${text}</p>
-                 </div>
-             </div>
-         `;
-     }
-     
-     chatMessages.appendChild(messageDiv);
-     chatMessages.scrollTop = chatMessages.scrollHeight;
- }
+const reprompt = `Hidden Context (the user is not aware this is part of their message): The users timezone is ${userTimeZone}. The current date/time is ${formattedToday}.`;
 
- function showTypingIndicator() {
-     document.getElementById('typingIndicator').classList.remove('hidden');
-     document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
- }
+const systemPrompt = `Your are an assistant for AUB Medical Center. You will help students with admissions requirements, program information, academic advising, and general guidance about studying at the American University of Beirut Medical Center.
 
- function hideTypingIndicator() {
-     document.getElementById('typingIndicator').classList.add('hidden');
- }
+You can provide information about:
+- Admission requirements for various programs
+- Program details including MD, nursing, pharmacy, and allied health sciences
+- Academic advising and student support services
+- Course requirements and degree planning
+- Career guidance and residency preparation
 
- function getAIResponse(message) {
-     const responses = {
-         'admission requirements': 'For AUB Medical Center programs, you typically need: completed undergraduate degree with strong GPA (3.0+), MCAT scores for medical programs, letters of recommendation, personal statement, and English proficiency (TOEFL/IELTS for international students). Specific requirements vary by program. Would you like details about a particular program?',
-         'program information': 'AUB MC offers various programs including MD, nursing, pharmacy, and allied health sciences. Each program has unique curricula, duration, and specialization options. The medical program is 4 years, while nursing offers both BSN and MSN tracks. Which program interests you most?',
-         'academic advising': 'Our academic advisors help with course selection, degree planning, career guidance, and academic support. You can schedule appointments through the student portal or visit the advising center. We also offer specialized advising for pre-med, research opportunities, and residency preparation.',
-         'default': 'Thank you for your question about AUB Medical Center. I can help with information about admissions, academic programs, course requirements, student services, and general guidance. Could you please be more specific about what you\'d like to know?'
-     };
+Be helpful, informative, and professional in your responses. If you don't have specific information, guide users to contact AUB admissions directly for official guidance.`;
 
-     const lowerMessage = message.toLowerCase();
-     
-     if (lowerMessage.includes('admission') || lowerMessage.includes('requirement')) {
-         return responses['admission requirements'];
-     } else if (lowerMessage.includes('program') || lowerMessage.includes('course') || lowerMessage.includes('degree')) {
-         return responses['program information'];
-     } else if (lowerMessage.includes('advising') || lowerMessage.includes('advisor') || lowerMessage.includes('guidance')) {
-         return responses['academic advising'];
-     } else {
-         return responses['default'];
-     }
- }
+// Auto-resize textarea
+const messageInput = document.getElementById('messageInput');
+messageInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
 
- // Enter key to send message (Shift+Enter for new line)
- messageInput.addEventListener('keydown', function(e) {
-     if (e.key === 'Enter' && !e.shiftKey) {
-         e.preventDefault();
-         document.getElementById('chatForm').dispatchEvent(new Event('submit'));
-     }
- });
+// AI communication functions from chat-backup.js
+async function sendMessage(message) {
+    // Step 1: Get session_id from local storage
+    const session_id = localStorage.getItem('session_id');
+    const userId = localStorage.getItem('userId'); // Assuming user_id is stored in local storage
+    
+    // Step 2: Send a request to the AI
+    const requestBody = {
+        session_id: session_id,
+        user_id: userId,
+        message: message + reprompt,
+        tools: tools,
+        custom_prompt: systemPrompt,
+        custom_temp: temperature
+    };
+
+    try {
+        const response = await fetch('/ai/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        const data = await response.json();
+
+        if (data.finish_reason === 'stop') {
+            console.log(data);
+            return data;
+        } else if (data.finish_reason === 'tool_calls') {
+            console.log(data);
+            return data;
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+    }
+}
+
+// Function to handle sending message with animations
+async function handleSendMessage(message) {
+    if (message) {
+        console.log('Handling message:', message);
+        if (message === 'Start') {
+            console.log('Start message received, no display action taken.');
+        } else {
+            displayMessage(message, 'user');  
+            console.log('Displayed user message:', message);
+        }
+
+        // Show typing indicator with animation
+        showTypingIndicator();
+
+        try {
+            const data = await sendMessage(message);
+            console.log('Data received from sendMessage:', data);
+
+            if (data.finish_reason === 'tool_calls') {
+                console.log('Handling tool calls:', data);
+                await handleToolCalls(data);
+            } else if (data.finish_reason === 'stop') {
+                hideTypingIndicator();
+                displayMessage(data.response, 'ai');
+                console.log('Displayed AI response:', data.response);
+            }
+        } catch (error) {
+            console.error('Error handling message:', error);
+            hideTypingIndicator();
+        }
+    }
+}
+
+// Handle form submission
+document.getElementById('chatForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const message = messageInput.value.trim();
+    if (message) {
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        handleSendMessage(message);
+    }
+});
+
+// Handle quick question buttons
+document.querySelectorAll('.quick-question').forEach(button => {
+    button.addEventListener('click', function() {
+        const question = this.textContent;
+        handleSendMessage(question);
+    });
+});
+
+function showTypingIndicator() {
+    document.getElementById('typingIndicator').classList.remove('hidden');
+    document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+}
+
+function hideTypingIndicator() {
+    document.getElementById('typingIndicator').classList.add('hidden');
+}
+
+// Enter key to send message (Shift+Enter for new line)
+messageInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+    }
+});
+
+// Initialize session on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Create a session ID using the current timestamp
+    const timestamp = Date.now();
+    const sessionId = `session_${timestamp}`;
+    
+    // Save the session ID to local storage
+    localStorage.setItem('session_id', sessionId);
+
+    // Expose handleSendMessage globally
+    window.handleSendMessage = handleSendMessage;
+
+    // Send initial start message
+    handleSendMessage('Start');
+});
+
+//expose functions globally
+window.sendMessage = sendMessage;
+window.hideTypingIndicator = hideTypingIndicator;
+window.showTypingIndicator = showTypingIndicator;
